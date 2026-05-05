@@ -1,0 +1,142 @@
+/**
+ * Run this once after deploy to seed the database:
+ *   npx tsx scripts/migrate.ts
+ *
+ * Or set it as a Railway deploy command.
+ */
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import { users, medicalProfiles } from "../src/lib/db/schema";
+import { sql } from "drizzle-orm";
+
+async function migrate() {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const db = drizzle(pool);
+
+  console.log("Creating tables...");
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS goals (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      current_weight REAL NOT NULL,
+      target_weight REAL NOT NULL,
+      target_date DATE NOT NULL,
+      activity_level TEXT NOT NULL DEFAULT 'moderate',
+      daily_calorie_target INTEGER,
+      protein_g INTEGER,
+      carbs_g INTEGER,
+      fat_g INTEGER,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS weight_logs (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      weight REAL NOT NULL,
+      recorded_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      notes TEXT
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS meals (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      meal_type TEXT NOT NULL DEFAULT 'snack',
+      description TEXT NOT NULL,
+      calories INTEGER,
+      protein_g REAL,
+      carbs_g REAL,
+      fat_g REAL,
+      sugar_g REAL,
+      fiber_g REAL,
+      ai_analyzed BOOLEAN NOT NULL DEFAULT FALSE,
+      recorded_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS activities (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      activity_type TEXT NOT NULL,
+      duration_minutes INTEGER,
+      calories_burned INTEGER,
+      description TEXT,
+      recorded_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS daily_summaries (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      date DATE NOT NULL,
+      total_calories INTEGER,
+      total_protein REAL,
+      total_carbs REAL,
+      total_fat REAL,
+      total_sugar REAL,
+      calories_burned INTEGER,
+      net_calories INTEGER,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS medical_profiles (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      conditions JSONB DEFAULT '[]',
+      allergies JSONB DEFAULT '[]',
+      medications JSONB DEFAULT '[]',
+      notes TEXT,
+      updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS food_inventory (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      items JSONB DEFAULT '[]',
+      source_description TEXT,
+      analyzed_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  // Seed the single user if not exists
+  const existing = await db.execute(sql`SELECT id FROM users WHERE id = 1`);
+  if (existing.rows.length === 0) {
+    await db.execute(sql`
+      INSERT INTO users (id, name, email) VALUES (1, 'Jason', null)
+    `);
+    console.log("✓ Seeded user");
+  } else {
+    console.log("✓ User already exists");
+  }
+
+  console.log("✓ All tables created successfully");
+  await pool.end();
+}
+
+migrate().catch((err) => {
+  console.error("Migration failed:", err);
+  process.exit(1);
+});
