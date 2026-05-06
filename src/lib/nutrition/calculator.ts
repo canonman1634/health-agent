@@ -49,7 +49,7 @@ export function calculateMacroTargets(
   targetWeightLbs: number,
   deficit: number
 ): MacroTargets {
-  const calories = Math.max(1200, tdee - deficit);
+  const calories = tdee - deficit;
 
   // Protein: 1g per lb of target body weight
   const proteinG = Math.round(targetWeightLbs);
@@ -81,20 +81,7 @@ export function calculateDailyDeficit(
   const totalDeficit = lbsToLose * 3500;
   const dailyDeficit = Math.round(totalDeficit / daysRemaining);
 
-  let safetyWarning: string | null = null;
-
-  if (dailyDeficit > 1500) {
-    safetyWarning =
-      "This goal requires an extreme deficit. Consider extending your timeline for safer, sustainable results.";
-  } else if (dailyDeficit > 1000) {
-    safetyWarning =
-      "This is an aggressive deficit. You may experience fatigue and muscle loss. A more moderate approach is recommended.";
-  }
-
-  // Cap at 1000 cal/day deficit for safety
-  const safeDeficit = Math.min(dailyDeficit, 1000);
-
-  return { deficit: safeDeficit, safetyWarning };
+  return { deficit: dailyDeficit, safetyWarning: null };
 }
 
 export function daysUntil(targetDate: string): number {

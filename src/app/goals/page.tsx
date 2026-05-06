@@ -28,7 +28,6 @@ export default function GoalsPage() {
   const [showGoalForm, setShowGoalForm] = useState(false);
   const [showWeightForm, setShowWeightForm] = useState(false);
   const [editingWeight, setEditingWeight] = useState<WeightLog | null>(null);
-  const [safetyWarning, setSafetyWarning] = useState<string | null>(null);
 
   const [currentWeight, setCurrentWeight] = useState("");
   const [targetWeight, setTargetWeight] = useState("");
@@ -89,8 +88,6 @@ export default function GoalsPage() {
         activityLevel,
       }),
     });
-    const data = await res.json();
-    if (data.safetyWarning) setSafetyWarning(data.safetyWarning);
     setShowGoalForm(false);
     loadData();
   }
@@ -143,13 +140,6 @@ export default function GoalsPage() {
           </button>
         </div>
       </div>
-
-      {safetyWarning && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-3 mb-4">
-          <p className="text-yellow-400 text-sm">⚠️ {safetyWarning}</p>
-          <button onClick={() => setSafetyWarning(null)} className="text-yellow-600 text-xs mt-1">Dismiss</button>
-        </div>
-      )}
 
       {showWeightForm && (
         <form onSubmit={saveWeight} className="bg-gray-900 rounded-2xl p-4 mb-4 space-y-3 border border-gray-800">
