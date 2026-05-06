@@ -128,8 +128,9 @@ export async function POST(request: NextRequest) {
       message: "All tables created and user seeded.",
     });
   } catch (err) {
+    const e = err as any;
     return NextResponse.json(
-      { error: String(err) },
+      { error: String(err), message: e?.message, code: e?.code, detail: e?.errors?.map?.((x: any) => x.message) },
       { status: 500 }
     );
   }
