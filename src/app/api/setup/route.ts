@@ -3,6 +3,13 @@ import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { checkApiAuth, unauthorizedResponse } from "@/lib/auth";
 
+export async function GET(request: NextRequest) {
+  if (!checkApiAuth(request)) return unauthorizedResponse();
+  const url = process.env.DATABASE_URL || "NOT SET";
+  const masked = url.replace(/:([^@]+)@/, ":***@").slice(0, 60);
+  return NextResponse.json({ dbUrl: masked, nodeEnv: process.env.NODE_ENV });
+}
+
 export async function POST(request: NextRequest) {
   if (!checkApiAuth(request)) return unauthorizedResponse();
 
