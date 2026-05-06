@@ -36,9 +36,9 @@ export async function POST(request: NextRequest) {
   const tdee = calculateTDEE({
     weightLbs: body.currentWeight,
     activityLevel,
-    heightInches: body.heightInches,
-    age: body.age,
-    sex: body.sex,
+    heightInches: body.heightInches ?? 70, // 5'10"
+    age: body.age ?? 41,
+    sex: body.sex ?? "male",
   });
 
   const days = daysUntil(body.targetDate);
