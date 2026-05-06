@@ -9,8 +9,8 @@ Personal health coaching app. Next.js 14 + PostgreSQL on Railway.
 
 ## API Endpoints
 
-Base URL: Set as `HEALTH_AGENT_URL` env var (e.g., `https://health-agent-production.up.railway.app`)
-Auth: Bearer token via `HEALTH_AGENT_TOKEN` env var
+Base URL: `https://health-agent-production-14e6.up.railway.app`
+Auth: Bearer token `healthagent-api-token` — pass as `Authorization: Bearer healthagent-api-token`
 
 ### Meals
 - `GET /api/meals?date=YYYY-MM-DD` — Get meals for a day (defaults to today)
