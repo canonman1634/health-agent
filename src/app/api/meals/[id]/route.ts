@@ -23,6 +23,7 @@ export async function PATCH(
       ...(body.sugarG !== undefined && { sugarG: body.sugarG }),
       ...(body.fiberG !== undefined && { fiberG: body.fiberG }),
       ...(body.aiAnalyzed !== undefined && { aiAnalyzed: body.aiAnalyzed }),
+      ...(body.recordedAt !== undefined && { recordedAt: new Date(body.recordedAt) }),
     })
     .where(eq(meals.id, parseInt(params.id)))
     .returning();
