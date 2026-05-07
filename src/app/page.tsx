@@ -69,7 +69,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/summary")
+    const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+    fetch(`/api/summary?date=${today}`)
       .then((r) => r.json())
       .then(setSummary)
       .catch(console.error)
