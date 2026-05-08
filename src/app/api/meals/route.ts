@@ -8,12 +8,11 @@ export async function GET(request: NextRequest) {
   if (!checkApiAuth(request)) return unauthorizedResponse();
 
   const dateParam = request.nextUrl.searchParams.get("date");
-  const date = dateParam ? new Date(dateParam) : new Date();
-
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
+  const offsetParam = request.nextUrl.searchParams.get("offset");
+  const offsetMs = offsetParam ? parseInt(offsetParam) * 60 * 1000 : 0;
+  const dateStr = dateParam ?? new Date().toISOString().split("T")[0];
+  const startOfDay = new Date(new Date(dateStr + "T00:00:00Z").getTime() + offsetMs);
+  const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
   const result = await db
     .select()

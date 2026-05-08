@@ -55,9 +55,10 @@ export default function DiaryPage() {
   async function loadData() {
     try {
       const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+      const offset = new Date().getTimezoneOffset();
       const [mealsRes, activitiesRes] = await Promise.all([
-        fetch(`/api/meals?date=${today}`),
-        fetch(`/api/activities?date=${today}`),
+        fetch(`/api/meals?date=${today}&offset=${offset}`),
+        fetch(`/api/activities?date=${today}&offset=${offset}`),
       ]);
       setMeals(await mealsRes.json());
       setActivities(await activitiesRes.json());

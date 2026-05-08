@@ -70,7 +70,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
-    fetch(`/api/summary?date=${today}`)
+    const offset = new Date().getTimezoneOffset();
+    fetch(`/api/summary?date=${today}&offset=${offset}`)
       .then((r) => r.json())
       .then(setSummary)
       .catch(console.error)
